@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record RoomCreateRequest(
 	@NotBlank @Size(max = 128) String title,
+	@Min(1) int stage,
 	@Min(2) @Max(4) int maxPlayers
 ) {
 }

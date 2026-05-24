@@ -67,6 +67,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | `NOT_FOUND`        | 404       | 유저 또는 방을 찾을 수 없음 |
 | `ROOM_FULL`        | 409       | 방 정원이 찼음 |
 | `ROOM_NOT_OPEN`    | 400       | 방이 `OPEN`이 아니어서 신규 참가 불가 |
+| `NOT_ROOM_PARTICIPANT` | 400   | 해당 방 참가자가 아닌데 나가기 시도 |
 | `BAD_CREDENTIALS`  | 401       | 로그인 ID/비밀번호 불일치 |
 | `VALIDATION_ERROR` | 400       | 요청 검증 실패(필드 메시지 포함) |
 
@@ -87,6 +88,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | POST   | `/api/rooms`         | 필요 |
 | GET    | `/api/rooms`         | 필요 |
 | POST   | `/api/rooms/{roomId}/join` | 필요 |
+| POST   | `/api/rooms/{roomId}/leave` | 필요 |
 
 헬스체크(모니터링): `GET /actuator/health` (인증 불필요)
 
@@ -219,6 +221,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | 필드         | 타입   | 제약 |
 | ------------ | ------ | ---- |
 | `title`      | string | 1~128자, 공백 불가 |
+| `stage`      | number | **1 이상** (플레이할 스테이지 번호) |
 | `maxPlayers` | number | **2 이상 4 이하** (최대 4명) |
 
 **성공:** `200 OK` — `RoomResponse` (아래 형식).
@@ -228,6 +231,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 ```json
 {
   "title": "아주대 로비",
+  "stage": 3,
   "maxPlayers": 4
 }
 ```
@@ -257,6 +261,29 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 
 ---
 
+### 방 나가기
+
+`POST /api/rooms/{roomId}/leave`
+
+인증된 유저 본인을 기준으로 처리합니다.
+
+| 나가는 유저 | 동작 |
+| ----------- | ---- |
+| **방장** (`hostUserId`와 동일) | 방을 DB에서 **삭제** (참가자·방 메타 포함). 다른 유저는 해당 `roomId`로 더 이상 접근 불가. |
+| **그 외 참가자** | `participantUserIds`에서 본인만 제거. 방은 유지되며 `OPEN`이면 이후 **재입장 가능**. |
+
+**성공**
+
+- 방장이 나간 경우: `204 No Content` (본문 없음)
+- 일반 참가자가 나간 경우: `200 OK` — 갱신된 `RoomResponse`
+
+**실패**
+
+- `roomId` 없음: `404` + `NOT_FOUND`
+- 참가자가 아님: `400` + `NOT_ROOM_PARTICIPANT`
+
+---
+
 ### RoomResponse (방 단건·목록 공통)
 
 | 필드                   | 타입           | 설명 |
@@ -264,6 +291,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | `roomId`               | string (UUID)  | 방 ID |
 | `hostUserId`           | string         | 방장 유저 ID |
 | `title`                | string         | 방 제목 |
+| `stage`                | number         | 플레이 스테이지 번호 |
 | `maxPlayers`           | number         | 최대 인원(2~4) |
 | `currentPlayerCount`   | number         | 현재 참가자 수 |
 | `status`               | string         | `OPEN`, `IN_PROGRESS`, `CLOSED` 중 하나 |
@@ -277,6 +305,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
   "roomId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "hostUserId": "player01",
   "title": "4인 팟",
+  "stage": 3,
   "maxPlayers": 4,
   "currentPlayerCount": 2,
   "status": "OPEN",

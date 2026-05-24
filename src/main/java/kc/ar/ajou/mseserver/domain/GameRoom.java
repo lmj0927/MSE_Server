@@ -31,6 +31,9 @@ public class GameRoom {
 	@Column(nullable = false, length = 128)
 	private String title;
 
+	@Column(nullable = false)
+	private int stage;
+
 	@Column(name = "max_players", nullable = false)
 	private int maxPlayers;
 
@@ -50,10 +53,11 @@ public class GameRoom {
 	protected GameRoom() {
 	}
 
-	public GameRoom(String hostUserId, String title, int maxPlayers) {
+	public GameRoom(String hostUserId, String title, int stage, int maxPlayers) {
 		this.roomId = UUID.randomUUID().toString();
 		this.hostUserId = hostUserId;
 		this.title = title;
+		this.stage = stage;
 		this.maxPlayers = maxPlayers;
 		this.participantUserIds.add(hostUserId);
 	}
@@ -72,6 +76,14 @@ public class GameRoom {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public int getStage() {
+		return stage;
+	}
+
+	public void setStage(int stage) {
+		this.stage = stage;
 	}
 
 	public int getMaxPlayers() {
@@ -117,5 +129,20 @@ public class GameRoom {
 		}
 		participantUserIds.add(userId);
 		return true;
+	}
+
+	public boolean isParticipant(String userId) {
+		return participantUserIds.contains(userId);
+	}
+
+	public boolean isHost(String userId) {
+		return hostUserId.equals(userId);
+	}
+
+	/**
+	 * Removes a non-host participant. Caller must verify the user is not the host.
+	 */
+	public void removeParticipant(String userId) {
+		participantUserIds.remove(userId);
 	}
 }

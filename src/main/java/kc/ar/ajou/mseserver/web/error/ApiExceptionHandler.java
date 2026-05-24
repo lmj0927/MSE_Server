@@ -34,6 +34,12 @@ public class ApiExceptionHandler {
 			.body(new ErrorBody("ROOM_NOT_OPEN", ex.getMessage()));
 	}
 
+	@ExceptionHandler(NotRoomParticipantException.class)
+	public ResponseEntity<ErrorBody> notParticipant(NotRoomParticipantException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(new ErrorBody("NOT_ROOM_PARTICIPANT", ex.getMessage()));
+	}
+
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<ErrorBody> badCredentials(BadCredentialsException ex) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

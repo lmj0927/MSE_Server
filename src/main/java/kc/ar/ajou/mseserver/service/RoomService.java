@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kc.ar.ajou.mseserver.domain.GameRoom;
 import kc.ar.ajou.mseserver.domain.RoomStatus;
 import kc.ar.ajou.mseserver.repository.GameRoomRepository;
+import kc.ar.ajou.mseserver.web.error.NotRoomParticipantException;
 import kc.ar.ajou.mseserver.web.error.RoomFullException;
 import kc.ar.ajou.mseserver.web.error.RoomNotFoundException;
 import kc.ar.ajou.mseserver.web.error.RoomNotOpenException;
@@ -22,8 +23,8 @@ public class RoomService {
 	}
 
 	@Transactional
-	public GameRoom createRoom(String hostUserId, String title, int maxPlayers) {
-		GameRoom room = new GameRoom(hostUserId, title, maxPlayers);
+	public GameRoom createRoom(String hostUserId, String title, int stage, int maxPlayers) {
+		GameRoom room = new GameRoom(hostUserId, title, stage, maxPlayers);
 		return gameRoomRepository.save(room);
 	}
 
@@ -43,5 +44,19 @@ public class RoomService {
 			throw new RoomFullException(roomId);
 		}
 		return gameRoomRepository.save(room);
+	}
+
+	@Transactional
+	public RoomLeaveResult leaveRoom(String roomId, String userId) {
+		GameRoom room = gameRoomRepository.findById(roomId).orElseThrow(() -> new RoomNotFoundException(roomId));
+		if (!room.isParticipant(userId)) {
+			throw new NotRoomParticipantException(roomId, userId);
+		}
+		if (room.isHost(userId)) {
+			gameRoomRepository.delete(room);
+			return new RoomLeaveResult(true, null);
+		}
+		room.removeParticipant(userId);
+		return new RoomLeaveResult(false, gameRoomRepository.save(room));
 	}
 }

@@ -44,10 +44,11 @@ class ApiIntegrationTest {
 				post("/api/rooms")
 					.header("Authorization", "Bearer " + tokenAlpha)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content("{\"title\":\"Lobby\",\"maxPlayers\":3}")
+					.content("{\"title\":\"Lobby\",\"stage\":2,\"maxPlayers\":3}")
 			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.hostUserId").value("alpha"))
+			.andExpect(jsonPath("$.stage").value(2))
 			.andExpect(jsonPath("$.maxPlayers").value(3))
 			.andExpect(jsonPath("$.participantUserIds", hasSize(1)))
 			.andReturn()
@@ -93,6 +94,106 @@ class ApiIntegrationTest {
 	}
 
 	@Test
+	void hostLeaveDeletesRoom() throws Exception {
+		register("hostleave", "secretpass1");
+		register("guestleave", "secretpass2");
+
+		String hostToken = login("hostleave", "secretpass1");
+		String guestToken = login("guestleave", "secretpass2");
+
+		MvcResult create = mockMvc
+			.perform(
+				post("/api/rooms")
+					.header("Authorization", "Bearer " + hostToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"title\":\"delete-me\",\"stage\":1,\"maxPlayers\":4}")
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String roomId = objectMapper.readTree(create.getResponse().getContentAsString()).get("roomId").asText();
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk());
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/leave", roomId).header("Authorization", "Bearer " + hostToken))
+			.andExpect(status().isNoContent());
+
+		mockMvc.perform(get("/api/rooms").header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[?(@.roomId == '" + roomId + "')]").isEmpty());
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void guestLeaveRemovesParticipantAndAllowsRejoin() throws Exception {
+		register("host2", "secretpass1");
+		register("guest2", "secretpass2");
+
+		String hostToken = login("host2", "secretpass1");
+		String guestToken = login("guest2", "secretpass2");
+
+		MvcResult create = mockMvc
+			.perform(
+				post("/api/rooms")
+					.header("Authorization", "Bearer " + hostToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"title\":\"stay\",\"stage\":2,\"maxPlayers\":4}")
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String roomId = objectMapper.readTree(create.getResponse().getContentAsString()).get("roomId").asText();
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.participantUserIds", hasSize(2)));
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/leave", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.currentPlayerCount").value(1))
+			.andExpect(jsonPath("$.participantUserIds", hasSize(1)));
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.participantUserIds", hasSize(2)));
+	}
+
+	@Test
+	void leaveWhenNotParticipantReturnsBadRequest() throws Exception {
+		register("outsider", "secretpass1");
+		register("roomhost", "secretpass2");
+
+		String hostToken = login("roomhost", "secretpass2");
+		String outsiderToken = login("outsider", "secretpass1");
+
+		MvcResult create = mockMvc
+			.perform(
+				post("/api/rooms")
+					.header("Authorization", "Bearer " + hostToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"title\":\"private\",\"stage\":1,\"maxPlayers\":4}")
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String roomId = objectMapper.readTree(create.getResponse().getContentAsString()).get("roomId").asText();
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/leave", roomId).header("Authorization", "Bearer " + outsiderToken))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("NOT_ROOM_PARTICIPANT"));
+	}
+
+	@Test
 	void joinWhenFullReturnsConflict() throws Exception {
 		register("hostx", "secretpass1");
 		register("guestx", "secretpass2");
@@ -107,7 +208,7 @@ class ApiIntegrationTest {
 				post("/api/rooms")
 					.header("Authorization", "Bearer " + hostToken)
 					.contentType(MediaType.APPLICATION_JSON)
-					.content("{\"title\":\"1v1\",\"maxPlayers\":2}")
+					.content("{\"title\":\"1v1\",\"stage\":1,\"maxPlayers\":2}")
 			)
 			.andExpect(status().isOk())
 			.andReturn();
