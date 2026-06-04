@@ -40,6 +40,12 @@ public class ApiExceptionHandler {
 			.body(new ErrorBody("NOT_ROOM_PARTICIPANT", ex.getMessage()));
 	}
 
+	@ExceptionHandler(NotRoomHostException.class)
+	public ResponseEntity<ErrorBody> notHost(NotRoomHostException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+			.body(new ErrorBody("NOT_ROOM_HOST", ex.getMessage()));
+	}
+
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<ErrorBody> badCredentials(BadCredentialsException ex) {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

@@ -52,6 +52,14 @@ public class RoomController {
 		return RoomResponse.from(roomService.joinRoom(roomId, principal.getUserId()));
 	}
 
+	@PostMapping("/{roomId}/start")
+	public RoomResponse start(
+		@AuthenticationPrincipal AccountPrincipal principal,
+		@PathVariable String roomId
+	) {
+		return RoomResponse.from(roomService.startRoom(roomId, principal.getUserId()));
+	}
+
 	@PostMapping("/{roomId}/leave")
 	public ResponseEntity<RoomResponse> leave(
 		@AuthenticationPrincipal AccountPrincipal principal,

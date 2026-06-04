@@ -145,4 +145,20 @@ public class GameRoom {
 	public void removeParticipant(String userId) {
 		participantUserIds.remove(userId);
 	}
+
+	/**
+	 * Transitions OPEN → IN_PROGRESS. No-op if already IN_PROGRESS.
+	 *
+	 * @return true if transitioned from OPEN; false if already IN_PROGRESS or not allowed
+	 */
+	public boolean tryStart() {
+		if (status == RoomStatus.IN_PROGRESS) {
+			return true;
+		}
+		if (status != RoomStatus.OPEN) {
+			return false;
+		}
+		status = RoomStatus.IN_PROGRESS;
+		return true;
+	}
 }

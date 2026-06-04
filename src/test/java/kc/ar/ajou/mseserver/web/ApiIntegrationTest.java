@@ -168,6 +168,71 @@ class ApiIntegrationTest {
 	}
 
 	@Test
+	void hostStartSetsInProgressAndExcludesFromOpenList() throws Exception {
+		register("starthost", "secretpass1");
+		register("startguest", "secretpass2");
+
+		String hostToken = login("starthost", "secretpass1");
+		String guestToken = login("startguest", "secretpass2");
+
+		MvcResult create = mockMvc
+			.perform(
+				post("/api/rooms")
+					.header("Authorization", "Bearer " + hostToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"title\":\"match\",\"stage\":1,\"maxPlayers\":4}")
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String roomId = objectMapper.readTree(create.getResponse().getContentAsString()).get("roomId").asText();
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/start", roomId).header("Authorization", "Bearer " + hostToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+
+		mockMvc.perform(get("/api/rooms").header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[?(@.roomId == '" + roomId + "')]").isEmpty());
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("ROOM_NOT_OPEN"));
+	}
+
+	@Test
+	void guestCannotStartRoom() throws Exception {
+		register("onlyhost", "secretpass1");
+		register("onlyguest", "secretpass2");
+
+		String hostToken = login("onlyhost", "secretpass1");
+		String guestToken = login("onlyguest", "secretpass2");
+
+		MvcResult create = mockMvc
+			.perform(
+				post("/api/rooms")
+					.header("Authorization", "Bearer " + hostToken)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content("{\"title\":\"no-start\",\"stage\":1,\"maxPlayers\":4}")
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+		String roomId = objectMapper.readTree(create.getResponse().getContentAsString()).get("roomId").asText();
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/join", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isOk());
+
+		mockMvc
+			.perform(post("/api/rooms/{roomId}/start", roomId).header("Authorization", "Bearer " + guestToken))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("NOT_ROOM_HOST"));
+	}
+
+	@Test
 	void leaveWhenNotParticipantReturnsBadRequest() throws Exception {
 		register("outsider", "secretpass1");
 		register("roomhost", "secretpass2");

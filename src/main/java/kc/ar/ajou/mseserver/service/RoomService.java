@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kc.ar.ajou.mseserver.domain.GameRoom;
 import kc.ar.ajou.mseserver.domain.RoomStatus;
 import kc.ar.ajou.mseserver.repository.GameRoomRepository;
+import kc.ar.ajou.mseserver.web.error.NotRoomHostException;
 import kc.ar.ajou.mseserver.web.error.NotRoomParticipantException;
 import kc.ar.ajou.mseserver.web.error.RoomFullException;
 import kc.ar.ajou.mseserver.web.error.RoomNotFoundException;
@@ -58,5 +59,20 @@ public class RoomService {
 		}
 		room.removeParticipant(userId);
 		return new RoomLeaveResult(false, gameRoomRepository.save(room));
+	}
+
+	@Transactional
+	public GameRoom startRoom(String roomId, String userId) {
+		GameRoom room = gameRoomRepository.findById(roomId).orElseThrow(() -> new RoomNotFoundException(roomId));
+		if (!room.isParticipant(userId)) {
+			throw new NotRoomParticipantException(roomId, userId);
+		}
+		if (!room.isHost(userId)) {
+			throw new NotRoomHostException(roomId);
+		}
+		if (!room.tryStart()) {
+			throw new RoomNotOpenException(roomId);
+		}
+		return gameRoomRepository.save(room);
 	}
 }

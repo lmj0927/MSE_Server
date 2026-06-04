@@ -67,7 +67,8 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | `NOT_FOUND`        | 404       | 유저 또는 방을 찾을 수 없음 |
 | `ROOM_FULL`        | 409       | 방 정원이 찼음 |
 | `ROOM_NOT_OPEN`    | 400       | 방이 `OPEN`이 아니어서 신규 참가 불가 |
-| `NOT_ROOM_PARTICIPANT` | 400   | 해당 방 참가자가 아닌데 나가기 시도 |
+| `NOT_ROOM_PARTICIPANT` | 400   | 해당 방 참가자가 아닌데 나가기·시작 시도 |
+| `NOT_ROOM_HOST`        | 403   | 방장만 가능한 동작을 비방장이 시도 |
 | `BAD_CREDENTIALS`  | 401       | 로그인 ID/비밀번호 불일치 |
 | `VALIDATION_ERROR` | 400       | 요청 검증 실패(필드 메시지 포함) |
 
@@ -88,6 +89,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 | POST   | `/api/rooms`         | 필요 |
 | GET    | `/api/rooms`         | 필요 |
 | POST   | `/api/rooms/{roomId}/join` | 필요 |
+| POST   | `/api/rooms/{roomId}/start` | 필요 |
 | POST   | `/api/rooms/{roomId}/leave` | 필요 |
 
 헬스체크(모니터링): `GET /actuator/health` (인증 불필요)
@@ -261,6 +263,25 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 
 ---
 
+### 게임 시작 (상태 → IN_PROGRESS)
+
+`POST /api/rooms/{roomId}/start`
+
+**방장**만 호출할 수 있습니다. `OPEN`인 방을 `IN_PROGRESS`로 바꿉니다. 이미 `IN_PROGRESS`이면 같은 상태로 `200 OK`를 반환합니다(재호출 허용).
+
+**성공:** `200 OK` — `status`가 `IN_PROGRESS`인 `RoomResponse`.
+
+**실패**
+
+- 방장이 아님: `403` + `NOT_ROOM_HOST`
+- 참가자가 아님: `400` + `NOT_ROOM_PARTICIPANT`
+- `CLOSED` 등 `OPEN`/`IN_PROGRESS`가 아닌 상태: `400` + `ROOM_NOT_OPEN`
+- `roomId` 없음: `404` + `NOT_FOUND`
+
+시작 후에는 `GET /api/rooms` 목록에 **나타나지 않으며**, 신규 `join`은 `ROOM_NOT_OPEN`으로 거절됩니다.
+
+---
+
 ### 방 나가기
 
 `POST /api/rooms/{roomId}/leave`
@@ -314,7 +335,7 @@ REST API는 **CSRF 비활성화** 상태입니다. 세션 쿠키가 아닌 JWT�
 }
 ```
 
-> 참고: 현재 API만으로 `IN_PROGRESS` / `CLOSED`로 바꾸는 전용 엔드포인트는 없습니다. 필요 시 이후 버전에서 추가하면 됩니다.
+> 참고: `CLOSED`로 바꾸는 전용 엔드포인트는 아직 없습니다.
 
 ---
 
