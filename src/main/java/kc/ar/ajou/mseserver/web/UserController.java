@@ -33,11 +33,6 @@ public class UserController {
 		@AuthenticationPrincipal AccountPrincipal principal,
 		@Valid @RequestBody UserUpdateRequest request
 	) {
-		return userProfileService.updateProfile(
-			principal.getUserId(),
-			request.currency(),
-			request.gameProgress(),
-			request.ownedItems()
-		);
+		return userProfileService.updateProfile(principal.getUserId(), request.gameProgress());
 	}
 }
