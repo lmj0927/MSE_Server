@@ -1,5 +1,6 @@
 package kc.ar.ajou.mseserver.web.error;
 
+/** not room host exception */
 public class NotRoomHostException extends RuntimeException {
 
 	public NotRoomHostException(String roomId) {

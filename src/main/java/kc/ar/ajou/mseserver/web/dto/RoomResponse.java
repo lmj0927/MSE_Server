@@ -6,6 +6,7 @@ import java.util.List;
 import kc.ar.ajou.mseserver.domain.GameRoom;
 import kc.ar.ajou.mseserver.domain.RoomStatus;
 
+/** room info response */
 public record RoomResponse(
 	String roomId,
 	String hostUserId,

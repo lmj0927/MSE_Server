@@ -13,6 +13,7 @@ import kc.ar.ajou.mseserver.web.dto.LoginRequest;
 import kc.ar.ajou.mseserver.web.dto.LoginResponse;
 import kc.ar.ajou.mseserver.web.dto.RegisterRequest;
 
+/** authentication API (register, login) */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

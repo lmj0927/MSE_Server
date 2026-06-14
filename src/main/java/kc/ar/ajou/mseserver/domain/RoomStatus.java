@@ -1,7 +1,8 @@
 package kc.ar.ajou.mseserver.domain;
 
+/** game room status */
 public enum RoomStatus {
-	OPEN,
-	IN_PROGRESS,
-	CLOSED
+	OPEN,        // waiting
+	IN_PROGRESS, // in progress
+	CLOSED       // closed
 }

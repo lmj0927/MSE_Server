@@ -4,6 +4,7 @@ import java.util.List;
 
 import kc.ar.ajou.mseserver.domain.GameRoom;
 
+/** game room create, join, start, leave */
 public interface RoomService {
 
 	GameRoom createRoom(String hostUserId, String title, int stage, int maxPlayers);

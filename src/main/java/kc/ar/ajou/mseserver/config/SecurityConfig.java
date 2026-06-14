@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import kc.ar.ajou.mseserver.security.JwtAuthenticationFilter;
 
+/** Spring Security configuration */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -28,6 +29,7 @@ public class SecurityConfig {
 		return configuration.getAuthenticationManager();
 	}
 
+	// stateless JWT authentication filter chain
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
 		throws Exception {

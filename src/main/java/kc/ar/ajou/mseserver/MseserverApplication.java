@@ -3,6 +3,7 @@ package kc.ar.ajou.mseserver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/** MSE server application entry point */
 @SpringBootApplication
 public class MseserverApplication {
 

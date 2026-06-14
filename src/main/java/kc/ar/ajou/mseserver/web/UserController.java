@@ -13,6 +13,7 @@ import kc.ar.ajou.mseserver.service.UserProfileService;
 import kc.ar.ajou.mseserver.web.dto.UserResponse;
 import kc.ar.ajou.mseserver.web.dto.UserUpdateRequest;
 
+/** user profile API */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {

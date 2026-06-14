@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/** room creation request */
 public record RoomCreateRequest(
 	@NotBlank @Size(max = 128) String title,
 	@Min(1) int stage,

@@ -14,6 +14,7 @@ import kc.ar.ajou.mseserver.web.error.RoomFullException;
 import kc.ar.ajou.mseserver.web.error.RoomNotFoundException;
 import kc.ar.ajou.mseserver.web.error.RoomNotOpenException;
 
+/** game room create, join, start, leave implementation */
 @Service
 public class RoomServiceImpl implements RoomService {
 
@@ -57,6 +58,7 @@ public class RoomServiceImpl implements RoomService {
 		if (!room.isParticipant(userId)) {
 			throw new NotRoomParticipantException(roomId, userId);
 		}
+		// delete room when host leaves
 		if (room.isHost(userId)) {
 			gameRoomRepository.delete(room);
 			return new RoomLeaveResult(true, null);

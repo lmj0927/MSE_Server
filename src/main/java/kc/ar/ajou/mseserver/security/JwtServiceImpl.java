@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+/** JWT token generation and parsing implementation */
 @Service
 public class JwtServiceImpl implements JwtService {
 

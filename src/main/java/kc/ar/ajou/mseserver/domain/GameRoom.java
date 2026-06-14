@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
+/** game room entity */
 @Entity
 @Table(name = "game_rooms")
 public class GameRoom {
@@ -44,6 +45,7 @@ public class GameRoom {
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt = Instant.now();
 
+	// participants (join order preserved)
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "room_participants", joinColumns = @JoinColumn(name = "room_id"))
 	@Column(name = "user_id", length = 64)
@@ -114,9 +116,7 @@ public class GameRoom {
 		return participantUserIds.size();
 	}
 
-	/**
-	 * @return true if the user is now in the room (including already present)
-	 */
+	// try to join (true if already in room)
 	public boolean tryJoin(String userId) {
 		if (participantUserIds.contains(userId)) {
 			return true;
@@ -139,18 +139,12 @@ public class GameRoom {
 		return hostUserId.equals(userId);
 	}
 
-	/**
-	 * Removes a non-host participant. Caller must verify the user is not the host.
-	 */
+	// remove non-host participant
 	public void removeParticipant(String userId) {
 		participantUserIds.remove(userId);
 	}
 
-	/**
-	 * Transitions OPEN → IN_PROGRESS. No-op if already IN_PROGRESS.
-	 *
-	 * @return true if transitioned from OPEN; false if already IN_PROGRESS or not allowed
-	 */
+	// transition OPEN to IN_PROGRESS
 	public boolean tryStart() {
 		if (status == RoomStatus.IN_PROGRESS) {
 			return true;

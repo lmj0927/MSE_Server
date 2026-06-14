@@ -10,6 +10,7 @@ import kc.ar.ajou.mseserver.repository.UserRepository;
 import kc.ar.ajou.mseserver.web.dto.UserResponse;
 import kc.ar.ajou.mseserver.web.error.UserNotFoundException;
 
+/** user profile read and update implementation */
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
 

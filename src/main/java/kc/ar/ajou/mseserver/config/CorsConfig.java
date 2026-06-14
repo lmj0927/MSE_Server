@@ -7,9 +7,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/** CORS configuration */
 @Configuration
 public class CorsConfig {
 
+	// register allowed origin patterns
 	@Bean
 	CorsConfigurationSource corsConfigurationSource(@Value("${mse.cors.allowed-origin-patterns}") String patterns) {
 		CorsConfiguration config = new CorsConfiguration();

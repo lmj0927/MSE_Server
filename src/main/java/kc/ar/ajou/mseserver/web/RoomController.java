@@ -19,6 +19,7 @@ import kc.ar.ajou.mseserver.service.RoomService;
 import kc.ar.ajou.mseserver.web.dto.RoomCreateRequest;
 import kc.ar.ajou.mseserver.web.dto.RoomResponse;
 
+/** game room API */
 @RestController
 @RequestMapping("/api/rooms")
 public class RoomController {
@@ -66,6 +67,7 @@ public class RoomController {
 		@PathVariable String roomId
 	) {
 		RoomLeaveResult result = roomService.leaveRoom(roomId, principal.getUserId());
+		// return 204 when host leaves
 		if (result.deleted()) {
 			return ResponseEntity.noContent().build();
 		}

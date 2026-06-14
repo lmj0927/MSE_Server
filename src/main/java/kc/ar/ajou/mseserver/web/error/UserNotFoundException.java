@@ -1,5 +1,6 @@
 package kc.ar.ajou.mseserver.web.error;
 
+/** user not found exception */
 public class UserNotFoundException extends RuntimeException {
 
 	public UserNotFoundException(String userId) {

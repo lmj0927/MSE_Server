@@ -1,5 +1,6 @@
 package kc.ar.ajou.mseserver.web.error;
 
+/** duplicate user exception */
 public class DuplicateUserException extends RuntimeException {
 
 	private final String userId;

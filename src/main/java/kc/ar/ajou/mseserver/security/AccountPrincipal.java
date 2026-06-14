@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import kc.ar.ajou.mseserver.domain.User;
 
+/** authenticated user principal */
 public class AccountPrincipal implements UserDetails {
 
 	private final String userId;

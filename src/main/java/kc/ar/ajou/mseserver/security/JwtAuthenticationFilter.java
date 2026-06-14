@@ -16,6 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/** JWT token validation filter */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

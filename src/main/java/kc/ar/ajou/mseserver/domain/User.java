@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 
+/** user entity */
 @Entity
 @Table(name = "users")
 public class User {
@@ -24,6 +25,7 @@ public class User {
 	@Column(name = "password_hash", nullable = false, length = 120)
 	private String passwordHash;
 
+	// max score per stage
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "user_game_progress", joinColumns = @JoinColumn(name = "user_id"))
 	@MapKeyColumn(name = "stage")

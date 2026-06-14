@@ -11,6 +11,7 @@ import kc.ar.ajou.mseserver.repository.UserRepository;
 import kc.ar.ajou.mseserver.security.JwtService;
 import kc.ar.ajou.mseserver.web.error.DuplicateUserException;
 
+/** registration and login implementation */
 @Service
 public class AuthServiceImpl implements AuthService {
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import kc.ar.ajou.mseserver.repository.UserRepository;
 
+/** user lookup for Spring Security */
 @Service
 public class AccountUserDetailsService implements UserDetailsService {
 

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import kc.ar.ajou.mseserver.domain.User;
 
+/** user profile response */
 public record UserResponse(
 	String userId,
 	Map<Integer, Integer> gameProgress

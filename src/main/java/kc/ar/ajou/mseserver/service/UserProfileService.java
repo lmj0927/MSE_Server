@@ -4,6 +4,7 @@ import java.util.Map;
 
 import kc.ar.ajou.mseserver.web.dto.UserResponse;
 
+/** user profile read and update */
 public interface UserProfileService {
 
 	UserResponse getProfile(String userId);
